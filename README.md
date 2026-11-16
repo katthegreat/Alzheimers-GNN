@@ -274,3 +274,106 @@ This checks the matrix dimensions and whether it contains positive and negative 
 The main thing completed so far is finding usable functional connectivity data and testing the graph construction logic
 
 We have not trained the actual GNN yet
+
+## Raw data setup
+
+Gunn this is how I organized the raw data folders and where everything came from
+
+The raw data is stored inside data/raw
+
+data/raw/
+    adni/
+    oasis3/
+    MNMI_AD/
+
+### ADNI
+
+I first looked through the ADNI website for functional connectivity data
+
+https://adni.loni.usc.edu/
+
+I checked the imaging data and study files but most of what I found was raw fMRI data or other imaging information instead of the complete correlation matrices we needed
+
+I kept the adni folder in our project but it is currently empty
+
+We are still using ADNI derived data through the MNMI_AD repository
+
+### OASIS-3
+
+I also looked through OASIS-3 for resting state fMRI and connectivity data
+
+https://sites.wustl.edu/oasisbrains/
+
+I downloaded the available scan metadata and clinical files into data/raw/oasis3
+
+The folder contains information such as
+
+- MRI scan information
+- Demographics
+- Cognitive assessments
+- Clinical diagnoses
+- Health history
+- Data dictionaries
+
+The local OASIS-3 folder is around 36 MB
+
+I also made a CSV called potential_fmri_scans.csv inside data/processed while checking which scans might be useful
+
+We still do not have precomputed OASIS-3 functional connectivity matrices
+
+To get the OASIS-3 files you will need to use the original dataset provider and follow their access instructions
+
+### MNMI_AD
+
+Since I could not find the precomputed correlation matrices directly through ADNI I found this GitHub repository
+
+https://github.com/Guoshi-Li/MNMI_AD
+
+This has processed ADNI brain connectivity data
+
+I downloaded it with
+
+mkdir -p data/raw
+
+git clone https://github.com/Guoshi-Li/MNMI_AD.git data/raw/MNMI_AD
+
+The main folders are
+
+DATA/FC
+DATA/SC
+DATA/BOLD
+SUBJECT
+
+FC contains the functional connectivity matrices we need
+
+SC contains structural connectivity data
+
+BOLD contains brain activity time series
+
+SUBJECT contains participant information
+
+The MNMI_AD folder is around 40 MB
+
+I checked one matrix called FC_AD19.mat and confirmed it was a 46 by 46 matrix with positive and negative correlation values
+
+We are going to use the FC matrices to construct our graphs
+
+### Getting the raw data on your computer
+
+Gunn after cloning our project make sure you are inside the main project folder
+
+mkdir -p data/raw/adni data/raw/oasis3
+
+If MNMI_AD is included as a Git submodule run
+
+git submodule update --init --recursive
+
+Otherwise if the MNMI_AD folder is not already there run
+
+git clone https://github.com/Guoshi-Li/MNMI_AD.git data/raw/MNMI_AD
+
+For OASIS-3 you will need to download the files through your own authorized dataset access
+
+The raw data is not included directly in our public GitHub repository because the research datasets may have redistribution restrictions
+
+This way we can share our code publicly while keeping the dataset downloads separate
