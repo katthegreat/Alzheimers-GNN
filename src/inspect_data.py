@@ -1,15 +1,19 @@
 from pathlib import Path
 import pandas as pd
 
+# finding the mri files from oasis3
 data_dir = Path("data/raw/oasis3/scans")
 files = list(data_dir.glob("MRI-json*/resources/csv/files/*.csv"))
 
+# checking if we found any files
 if not files:
     raise FileNotFoundError("MRI metadata CSV not found.")
 
+# reading the csv file
 df = pd.read_csv(files[0], low_memory=False)
 df.columns = df.columns.str.strip()
 
+# seeing how many scans and people are in the data
 print("Total MRI records:", len(df))
 print("Unique participants:", df["subject_id"].nunique())
 
@@ -23,20 +27,24 @@ possible_columns = [
     "label"
 ]
 
+# checking which columns we actually have
 columns = [c for c in possible_columns if c in df.columns]
 
 print("\nAvailable scan-description columns:", columns)
 
+# looking at what each column contains
 for col in columns:
     print(f"\n--- {col} ---")
     print(df[col].value_counts(dropna=False).head(20).to_string())
 
-#  Keywords to find  the potential functional MRI records
+# Keywords to find the potential functional MRI records
 keywords = r"rest|fmri|bold|functional|rsfmri|rs-fmri"
 
+# making sure the columns exist
 if not columns:
     raise ValueError("No scan-description columns found.")
 
+# searching for scans that match the keywords
 mask = (
     df[columns]
     .fillna("")
@@ -49,11 +57,14 @@ mask = (
     .any(axis=1)
 )
 
+# getting the scans that matched
 fmri_scans = df.loc[mask].copy()
 
+# checking how many fmri scans we found
 print("\nPotential fMRI records:", len(fmri_scans))
 print("Participants:", fmri_scans["subject_id"].nunique())
 
+# printing some of the matching scan descriptions
 print("\nMatching scan descriptions:")
 print(
     fmri_scans[columns]
@@ -62,6 +73,7 @@ print(
     .to_string(index=False)
 )
 
+# saving the results so we can use them later
 output = Path("data/processed/potential_fmri_scans.csv")
 output.parent.mkdir(parents=True, exist_ok=True)
 fmri_scans.to_csv(output, index=False)
